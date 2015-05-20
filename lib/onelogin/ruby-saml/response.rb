@@ -202,13 +202,9 @@ module OneLogin
         reset_errors!
         Rails.logger.info "Validate Response"
         validate_response_state(soft) &&
-        Rails.logger.info "Validate Structure"
         validate_structure(soft) &&
-        Rails.logger.info "Validate Conditions"
         validate_conditions(soft) &&
-        Rails.logger.info "Validate Issuer"
         validate_issuer(soft) &&
-        Rails.logger.info "Validate Document"
         document.validate_document(settings.get_fingerprint, soft, :fingerprint_alg => settings.idp_cert_fingerprint_algorithm) &&
         validate_success_status(soft)
       end
@@ -219,8 +215,9 @@ module OneLogin
       # @raise [ValidationError] if soft == false and validation fails
       #
       def validate_success_status(soft = true)
+        Rails.logger.info "Validate Success Status"
         return true if success?
-
+        Rails.logger.info status_message
         return append_error(soft, status_message)
       end
 
@@ -230,6 +227,7 @@ module OneLogin
       # @raise [ValidationError] if soft == false and validation fails
       #
       def validate_structure(soft = true)
+        Rails.logger.info "Validate Structure"
         unless valid_saml?(document, soft)
           return append_error(soft, "Invalid SAML Response. Not match the saml-schema-protocol-2.0.xsd")
         end
@@ -283,6 +281,7 @@ module OneLogin
       # @raise [ValidationError] if soft == false and validation fails
       #
       def validate_conditions(soft = true)
+        Rails.logger.info "Validating conditions"
         return true if conditions.nil?
         return true if options[:skip_conditions]
 
@@ -307,6 +306,7 @@ module OneLogin
       # @raise [ValidationError] if soft == false and validation fails
       #
       def validate_issuer(soft = true)
+        Rails.logger.info "Validating Issuer"
         return true if settings.idp_entity_id.nil?
 
         unless URI.parse(issuer) == URI.parse(settings.idp_entity_id)
