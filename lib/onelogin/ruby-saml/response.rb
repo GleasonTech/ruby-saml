@@ -105,7 +105,7 @@ module OneLogin
       #    attributes['name']
       #
       # @return [Attributes] OneLogin::RubySaml::Attributes enumerable collection.
-      #      
+      #
       def attributes
         @attr_statements ||= begin
           attributes = Attributes.new
@@ -141,7 +141,7 @@ module OneLogin
 
       # Checks if the Status has the "Success" code
       # @return [Boolean] True if the StatusCode is Sucess
-      # 
+      #
       def success?
         @status_code ||= begin
           node = REXML::XPath.first(document, "/p:Response/p:Status/p:StatusCode", { "p" => PROTOCOL, "a" => ASSERTION })
@@ -200,11 +200,15 @@ module OneLogin
       #
       def validate(soft = true)
         reset_errors!
-
+        Rails.logger.info "Validate Response"
         validate_response_state(soft) &&
+        Rails.logger.info "Validate Structure"
         validate_structure(soft) &&
+        Rails.logger.info "Validate Conditions"
         validate_conditions(soft) &&
+        Rails.logger.info "Validate Issuer"
         validate_issuer(soft) &&
+        Rails.logger.info "Validate Document"
         document.validate_document(settings.get_fingerprint, soft, :fingerprint_alg => settings.idp_cert_fingerprint_algorithm) &&
         validate_success_status(soft)
       end
@@ -216,14 +220,14 @@ module OneLogin
       #
       def validate_success_status(soft = true)
         return true if success?
-          
+
         return append_error(soft, status_message)
       end
 
       # Validates the SAML Response against the specified schema.
       # @param soft [Boolean] soft Enable or Disable the soft mode (In order to raise exceptions when the response is invalid or not)
       # @return [Boolean] True if the XML is valid, otherwise False if soft=True
-      # @raise [ValidationError] if soft == false and validation fails 
+      # @raise [ValidationError] if soft == false and validation fails
       #
       def validate_structure(soft = true)
         unless valid_saml?(document, soft)
